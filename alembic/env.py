@@ -10,12 +10,12 @@ from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 from app.models import (
-    Verification_Request,
+    VerificationRequest,
     Source,
     Article,
     Claim,
     Evidence,
-    Verification_Report
+    VerificationReport,
 )
 
 # this is the Alembic Config object, which provides
