@@ -364,8 +364,9 @@ def run_verification(
         raise
 
 
+
 def build_news_queries(claim: str) -> list[str]:
-    """Build a primary news query and broader fallbacks."""
+    """Build concise search queries while preserving key entities."""
 
     ignored_words = {
         "a", "an", "the", "of", "in", "on", "at", "to",
@@ -377,9 +378,10 @@ def build_news_queries(claim: str) -> list[str]:
         "increased", "increase", "increases", "raising",
         "raised", "decreased", "decrease", "decreases",
         "reported", "reports", "announced", "announces",
-        "changed", "change", "changes", "changed",
-        "remain", "remains", "remained", "unchanged",
-        "during", "after", "before",
+        "changed", "change", "changes", "remain", "remains",
+        "remained", "unchanged", "during", "after", "before",
+        "comes", "come", "coming", "from",
+        "best", "top", "ideal",
         "january", "february", "march", "april", "may",
         "june", "july", "august", "september", "october",
         "november", "december",
@@ -391,7 +393,6 @@ def build_news_queries(claim: str) -> list[str]:
     for word in words:
         lower_word = word.lower()
 
-        # Omit standalone years such as 2026 from the main query.
         if lower_word.isdigit() and len(lower_word) == 4:
             continue
 
@@ -399,30 +400,39 @@ def build_news_queries(claim: str) -> list[str]:
             keywords.append(word)
 
     unique_keywords = list(dict.fromkeys(keywords))
-    queries = []
 
-    primary = " ".join(unique_keywords[:6])
+    if not unique_keywords:
+        return []
 
-    if primary:
-        queries.append(primary)
+    # Keep the first five terms and the final term when a long claim
+    # contains an important entity near its end.
+    primary_terms = unique_keywords[:5]
 
+    if len(unique_keywords) > 6:
+        primary_terms.append(unique_keywords[-1])
+
+    queries = [" ".join(primary_terms)]
+
+    # A shorter query preserves the key subject and likely entity.
+    if len(unique_keywords) >= 3:
+        entity_focused = unique_keywords[:2] + [unique_keywords[-1]]
+        queries.append(" ".join(entity_focused))
+
+    # Preserve the existing special case for RBI repo-rate claims.
     lower_claim = claim.lower()
 
-    # Search common aliases when the claim contains the full institution name.
-    if "reserve bank of india" in lower_claim and "repo rate" in lower_claim:
+    if (
+        "reserve bank of india" in lower_claim
+        and "repo rate" in lower_claim
+    ):
         queries.append('RBI AND "repo rate"')
 
-    # Broaden the query if the primary search is too restrictive.
-    if len(unique_keywords) >= 4:
-        broader = " ".join(unique_keywords[:3])
-        queries.append(broader)
-
-    # Preserve order while removing repeated queries.
-    return list(dict.fromkeys(queries))
+    return list(dict.fromkeys(q for q in queries if q.strip()))
 
 
 def build_news_query(claim: str) -> str:
-    """Return the primary query for callers needing a single query."""
+    """Return the primary query for callers needing one query."""
     queries = build_news_queries(claim)
     return queries[0] if queries else claim.strip()
+
 
