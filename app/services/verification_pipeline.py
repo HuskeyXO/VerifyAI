@@ -86,35 +86,43 @@ def run_verification(
         # 1. Retrieve news articles.
 
         provider = get_news_provider()
-        search_query = build_news_query(verification.claim)
+        
+        search_queries = build_news_queries(verification.claim)
+        raw_articles = []
 
-        print("News search query:", search_query)
+        for search_query in search_queries:
+            print("News search query:", search_query)
 
-        try:
-            raw_articles = provider.search_articles(
-                search_query,
-                max_results=max_results,
-            )
-        except requests.exceptions.HTTPError as exc:
-            if exc.response is not None and exc.response.status_code == 429:
+            try:
+                raw_articles = provider.search_articles(
+                    search_query,
+                    max_results=max_results
+                )
+            except requests.exceptions.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code == 429:
+                    raise NewsProviderUnavailableError(
+                        "News provider rate limit reached. Retry later."
+                    ) from exc
+
                 raise NewsProviderUnavailableError(
-                    "News provider rate limit reached. Retry later."
+                    "News provider returned an HTTP error."
                 ) from exc
 
-            raise NewsProviderUnavailableError(
-                "News provider returned an HTTP error."
-            ) from exc
-        except requests.exceptions.RequestException as exc:
-            raise NewsProviderUnavailableError(
-                "Could not connect to the news provider."
-            ) from exc
+            except requests.exceptions.RequestException as exc:
+                raise NewsProviderUnavailableError(
+                    "Could not connect to the news provider."
+                ) from exc
 
-        print("News articles returned:", len(raw_articles))
+            print("News articles returned:", len(raw_articles))
+
+            if raw_articles:
+                break
 
         if not raw_articles:
             raise NoNewsArticlesError(
-                "No news articles were found for this claim."
+                "No news articles were found after trying the available search queries."
             )
+
 
 
 
@@ -309,29 +317,66 @@ def run_verification(
         db.rollback()
         raise
 
-def build_news_query(claim: str) -> str:
-    """Extract useful search terms from a claim."""
+
+def build_news_queries(claim: str) -> list[str]:
+    """Build a primary news query and broader fallbacks."""
 
     ignored_words = {
         "a", "an", "the", "of", "in", "on", "at", "to",
         "for", "with", "by", "is", "are", "was", "were",
         "be", "been", "being", "has", "have", "had",
         "do", "does", "did", "it", "its", "that", "this",
-        "according", "whether", "claim", "claimed",
-        "claims", "selected", "product", "products",
+        "according", "whether", "claim", "claimed", "claims",
+        "selected", "product", "products",
         "increased", "increase", "increases", "raising",
         "raised", "decreased", "decrease", "decreases",
         "reported", "reports", "announced", "announces",
+        "changed", "change", "changes", "changed",
+        "remain", "remains", "remained", "unchanged",
+        "during", "after", "before",
+        "january", "february", "march", "april", "may",
+        "june", "july", "august", "september", "october",
+        "november", "december",
     }
 
     words = re.findall(r"[A-Za-z0-9]+", claim)
 
-    keywords = [
-        word for word in words
-        if word.lower() not in ignored_words
-    ]
+    keywords = []
+    for word in words:
+        lower_word = word.lower()
 
-    # Avoid sending the same keyword more than once.
+        # Omit standalone years such as 2026 from the main query.
+        if lower_word.isdigit() and len(lower_word) == 4:
+            continue
+
+        if lower_word not in ignored_words:
+            keywords.append(word)
+
     unique_keywords = list(dict.fromkeys(keywords))
+    queries = []
 
-    return " ".join(unique_keywords[:6])
+    primary = " ".join(unique_keywords[:6])
+
+    if primary:
+        queries.append(primary)
+
+    lower_claim = claim.lower()
+
+    # Search common aliases when the claim contains the full institution name.
+    if "reserve bank of india" in lower_claim and "repo rate" in lower_claim:
+        queries.append('RBI AND "repo rate"')
+
+    # Broaden the query if the primary search is too restrictive.
+    if len(unique_keywords) >= 4:
+        broader = " ".join(unique_keywords[:3])
+        queries.append(broader)
+
+    # Preserve order while removing repeated queries.
+    return list(dict.fromkeys(queries))
+
+
+def build_news_query(claim: str) -> str:
+    """Return the primary query for callers needing a single query."""
+    queries = build_news_queries(claim)
+    return queries[0] if queries else claim.strip()
+
