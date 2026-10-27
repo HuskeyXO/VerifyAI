@@ -12,7 +12,7 @@ from app.models.source import Source
 
 from app.services.news.service import get_news_provider
 from app.services.ai_verifier import analyze_claim
-from app.services.evidence import save_evidence
+from app.services.evidence import save_evidence, normalize_text
 from app.services.verification_report import generate_verification_result
 
 import re
@@ -263,14 +263,60 @@ def run_verification(
             raise AIProviderUnavailableError(
                 "AI analysis failed. Check provider availability and configuration."
             ) from exc
+        
+        ai_items = ai_result.get("evidence", [])
+
+        print("AI evidence candidates:", len(ai_items))
+
+        for item in ai_items:
+            article_index = item.get("article_index")
+
+            valid_index = (
+                isinstance(article_index, int)
+                and not isinstance(article_index, bool)
+                and 1 <= article_index <= len(saved_articles)
+            )
+
+            quoted_text = item.get("quoted_text")
+            quote_matches = False
+
+            if valid_index and isinstance(quoted_text, str):
+                article = saved_articles[article_index - 1]
+
+                source_text = normalize_text(
+                    f"{article.title}\n{article.content or ''}"
+                )
+
+                quote_matches = (
+                    normalize_text(quoted_text) in source_text
+                )
+
+            print(
+                "Evidence candidate check:",
+                {
+                    "relation": item.get("relation"),
+                    "score": item.get("relevance_score"),
+                    "valid_article_index": valid_index,
+                    "has_quote": bool(
+                        isinstance(quoted_text, str) and quoted_text.strip()
+                    ),
+                    "quote_matches": quote_matches,
+                    "has_reason": bool(
+                        isinstance(item.get("reason"), str)
+                        and item["reason"].strip()
+                    ),
+                },
+            )
 
         # 5. Persist supporting and contradicting evidence.
-        save_evidence(
+        saved_evidence = save_evidence(
             claim=claim,
             articles=saved_articles,
-            ai_evidence=ai_result.get("evidence", []),
+            ai_evidence=ai_items,
             db=db,
         )
+
+        print("Evidence records saved:", len(saved_evidence))
 
         # 6. Calculate and save the report.
         result = generate_verification_result(
