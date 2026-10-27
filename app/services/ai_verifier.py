@@ -49,36 +49,41 @@ Allowed relations:
 - contradicts
 - irrelevant
 
+
 Rules:
-1. Use only the supplied article title and text. Do not use outside knowledge.
-2. A matching topic or headline alone is not enough to prove a claim.
-3. Check the subject, geography, product, and time period.
-
-4. Distinguish official retail prices from resale prices, discounts,
-   forecasts, rumors, and general market commentary.
-5. Opinion, editorial, and analysis articles may provide context, but
-   do not treat them as independent factual confirmation merely because
-   they say prices are rising.
-6. Use "supports" only when the supplied text directly reports a price
-   increase relevant to the claim. Use "contradicts" only when the text
-   directly reports facts against the claim.
-7. If an article merely says prices are "climbing sharply", discusses
-   a "price shock", or makes a broad market observation without
-   sufficiently specific factual reporting, classify it as "irrelevant".
-8. Do not infer an official price change from resale prices, demand,
-   shortages, or comparisons with competitors.
-9. Do not invent products, dates, old prices, new prices, or sources.
-10. For every included article, provide quoted_text as an exact,
-    continuous quotation from its supplied description or content.
-    If no suitable exact quotation exists, exclude the article.
-
-11. relevance_score measures how directly the quoted text relates to
-    the claim, not the probability that the claim is true.
-12. Do not determine the final verdict. The application evaluates
-    the evidence separately.
-13. Keep the reason concise and explain the link between the quotation
-    and the claim.
-14. Return only valid JSON. Do not use Markdown fences.
+1. Use only the supplied article title and text. Do not invent facts
+   or use outside knowledge.
+2. Evaluate the exact claim, not merely whether the article discusses
+   the same general topic.
+3. Check the subject, action or predicate, geography, time period,
+   and important qualifiers in the claim.
+4. Use "supports" when the supplied text directly provides factual
+   evidence consistent with the central assertion in the claim.
+5. Use "contradicts" when the supplied text directly provides factual
+   evidence against the central assertion under the relevant context.
+6. Use "irrelevant" when the article does not provide meaningful
+   evidence for or against the claim, or when essential information
+   is missing.
+7. For product claims, distinguish product availability, specifications,
+   reviews, rankings, prices, and personal opinions. Do not treat one
+   category as proof of another.
+8. For claims containing words such as "best", "largest", or "fastest",
+   require a meaningful comparison, explicit ranking, or criteria that
+   address the superlative. Merely mentioning a product is insufficient.
+9. Do not infer that a product is available in a particular country
+   unless the supplied text supports that geographic detail.
+10. For every included article, return quoted_text as an exact,
+    continuous quotation copied from its supplied description or content.
+    Do not paraphrase the quotation or invent missing words.
+11. If no suitable quotation supports the assigned relationship,
+    omit that article from the evidence array.
+12. relevance_score measures the direct relevance of the quoted text
+    to the claim, not the probability that the claim is true.
+13. Do not determine the final verdict. The application evaluates
+    the accepted evidence separately.
+14. Keep the reason concise and explain how the quotation relates
+    to the claim.
+15. Return only valid JSON, without Markdown fences.
 
 Required JSON structure:
 {{
