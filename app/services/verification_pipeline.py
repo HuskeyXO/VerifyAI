@@ -365,8 +365,9 @@ def run_verification(
 
 
 
+
 def build_news_queries(claim: str) -> list[str]:
-    """Build concise search queries while preserving key entities."""
+    """Build focused queries while preserving the company and topic."""
 
     ignored_words = {
         "a", "an", "the", "of", "in", "on", "at", "to",
@@ -375,59 +376,88 @@ def build_news_queries(claim: str) -> list[str]:
         "do", "does", "did", "it", "its", "that", "this",
         "according", "whether", "claim", "claimed", "claims",
         "selected", "product", "products",
-        "increased", "increase", "increases", "raising",
-        "raised", "decreased", "decrease", "decreases",
+        "increased", "increase", "increases", "raising", "raised",
+        "decreased", "decrease", "decreases",
         "reported", "reports", "announced", "announces",
         "changed", "change", "changes", "remain", "remains",
         "remained", "unchanged", "during", "after", "before",
         "comes", "come", "coming", "from",
+        "sells", "sell", "selling", "sold",
+        "manufactures", "manufacture", "manufacturing",
+        "makes", "make", "offers", "offer",
+        "provides", "provide", "produces", "produce",
         "best", "top", "ideal",
         "january", "february", "march", "april", "may",
         "june", "july", "august", "september", "october",
         "november", "december",
     }
 
+    locations = {
+        "india", "usa", "uk", "canada", "australia",
+        "china", "japan", "singapore",
+    }
+
     words = re.findall(r"[A-Za-z0-9]+", claim)
 
     keywords = []
     for word in words:
-        lower_word = word.lower()
+        normalized = word.lower()
 
-        if lower_word.isdigit() and len(lower_word) == 4:
+        if normalized.isdigit() and len(normalized) == 4:
             continue
 
-        if lower_word not in ignored_words:
+        if normalized not in ignored_words:
             keywords.append(word)
 
+    # Keep the original order and avoid duplicate terms.
     unique_keywords = list(dict.fromkeys(keywords))
 
     if not unique_keywords:
         return []
 
-    # Keep the first five terms and the final term when a long claim
-    # contains an important entity near its end.
-    primary_terms = unique_keywords[:5]
+    queries = []
 
-    if len(unique_keywords) > 6:
-        primary_terms.append(unique_keywords[-1])
+    def add_query(terms: list[str]) -> None:
+        query = " ".join(terms).strip()
+        if query and query not in queries:
+            queries.append(query)
 
-    queries = [" ".join(primary_terms)]
+    # Primary query retains geography when available.
+    add_query(unique_keywords[:6])
 
-    # A shorter query preserves the key subject and likely entity.
-    if len(unique_keywords) >= 3:
-        entity_focused = unique_keywords[:2] + [unique_keywords[-1]]
-        queries.append(" ".join(entity_focused))
+    # Broader query retains the entity and topic but omits location.
+    without_location = [
+        word for word in unique_keywords
+        if word.lower() not in locations
+    ]
+    add_query(without_location[:6])
 
-    # Preserve the existing special case for RBI repo-rate claims.
+    # Try the singular/plural alternative for mouse-related claims.
+    for source_word, alternative in (
+        ("mice", "mouse"),
+        ("mouse", "mice"),
+    ):
+        for base_terms in (
+            unique_keywords[:6],
+            without_location[:6],
+        ):
+            if source_word in [word.lower() for word in base_terms]:
+                variant = [
+                    alternative if word.lower() == source_word else word
+                    for word in base_terms
+                ]
+                add_query(variant)
+
+    # Preserve the existing RBI-specific query.
     lower_claim = claim.lower()
-
     if (
         "reserve bank of india" in lower_claim
         and "repo rate" in lower_claim
     ):
-        queries.append('RBI AND "repo rate"')
+        add_query(['RBI', '"repo rate"'])
 
-    return list(dict.fromkeys(q for q in queries if q.strip()))
+    # Avoid spending the daily quota on too many fallbacks.
+    return queries[:3]
 
 
 def build_news_query(claim: str) -> str:
