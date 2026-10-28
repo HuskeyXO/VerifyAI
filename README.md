@@ -7,22 +7,21 @@ VerifyAI is an AI-assisted news verification API that evaluates claims using new
 - REST API built with FastAPI.
 - PostgreSQL persistence using SQLAlchemy.
 - Database migrations managed with Alembic.
-- News retrieval using GNews.
-- AI-based evidence classification using Google Gemini, with Hugging Face and mock providers supported.
+- Web search using Tavily, with GNews as an alternative news provider.
+- AI-based evidence classification using Google Gemini.
+- Duplicate-story detection and traceable verification reports.
 - Article text extraction using Trafilatura, with fallback to provider-supplied text.
 - Evidence quotation validation and relevance filtering.
-- Report generation with source and duplicate-story safeguards.
 - Automated tests using pytest and isolated SQLite databases.
 
 ## Tech Stack
 
-Python, FastAPI, Pydantic, SQLAlchemy, PostgreSQL, Alembic, Google Gemini, Hugging Face, GNews, Trafilatura, pytest.
-
+Python, FastAPI, Pydantic, SQLAlchemy, PostgreSQL, Alembic, Google Gemini, Tavily, GNews, Hugging Face, Trafilatura, pytest.
 ## Prerequisites
 
 - Python and pip
 - PostgreSQL
-- GNews API key for live news retrieval
+- Tavily API key for live news retrieval
 - Gemini API key for live AI classification
 
 ## Setup
@@ -56,7 +55,7 @@ For live providers, use:
 
 ```env
 AI_PROVIDER=gemini
-NEWS_PROVIDER=gnews
+NEWS_PROVIDER=tavily
 ```
 
 For local testing without external API requests, use:
@@ -86,15 +85,27 @@ The API will be available at `http://127.0.0.1:8000`.
 
 Interactive API documentation is available at `http://127.0.0.1:8000/docs`.
 
+
+## Live Deployment
+
+VerifyAI is deployed on Render and uses Neon PostgreSQL for persistent storage.
+
+- **API Base URL:** https://verifyai-api.onrender.com
+- **Interactive API Documentation:** https://verifyai-api.onrender.com/docs
+- **Health Check:** https://verifyai-api.onrender.com/health
+
+
+
 ## Verification Workflow
 
-1. Create a request using `POST /verifications/`.
-2. Run verification using `POST /verifications/{verification_id}/run`.
+1. Create a verification request using `POST /verifications/`.
+2. Run the verification using `POST /verifications/{verification_id}/run`.
 3. Retrieve the report using `GET /verifications/{verification_id}/report`.
 4. Retrieve accepted evidence using `GET /evidence/verification/{verification_id}`.
 
-The report includes a verdict, summary, and optional confidence score. The confidence score is a heuristic evidence-strength measure, not a calibrated probability that a claim is true.
-
+The report contains a verdict, summary, and optional confidence score.
+The confidence score is a heuristic evidence-strength measure, not a
+calibrated probability that a claim is true.
 ## Run Tests
 
 ```bash
