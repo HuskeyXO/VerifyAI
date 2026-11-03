@@ -57,6 +57,24 @@ Rules:
    the same general topic.
 3. Check the subject, action or predicate, geography, time period,
    and important qualifiers in the claim.
+
+3a. Treat time periods as important claim qualifiers. An article
+    describing an event in a different year or period does not
+    automatically contradict a claim about another period.
+
+3b. A temporal mismatch alone is insufficient to establish
+    contradiction. Classify the article as irrelevant when it
+    discusses a different period but does not establish whether
+    the claimed event occurred during the period in question.
+
+3c. Use "contradicts" for temporal claims only when the supplied
+    text explicitly denies the event during the claimed period
+    or establishes an incompatible timeline.
+
+3d. For example, reporting that an event occurred in 2024 does
+    not prove that it did not also occur in 2025.
+
+
 4. Use "supports" when the supplied text directly provides factual
    evidence consistent with the central assertion in the claim.
 5. Use "contradicts" when the supplied text directly provides factual

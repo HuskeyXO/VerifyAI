@@ -1,0 +1,366 @@
+
+
+[
+  {
+    "id": "SUP001",
+    "category": "direct_support",
+    "claim": "Northstar Pay launched instant bank transfers on 1 August 2025.",
+    "articles": [
+      {
+        "title": "Northstar Pay introduces instant bank transfers",
+        "source": "Northstar Newsroom",
+        "published_at": "2025-08-01",
+        "content": "Northstar Pay announced that instant bank transfers became available to customers on 1 August 2025. The feature allows users to transfer funds between supported bank accounts within seconds.",
+        "url": "https://northstar.example/news/instant-transfers"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "SUP002",
+    "category": "direct_support",
+    "claim": "The Kestrel EV battery warranty lasts eight years.",
+    "articles": [
+      {
+        "title": "Kestrel announces warranty details for its electric vehicle",
+        "source": "Kestrel Motors",
+        "published_at": "2025-03-10",
+        "content": "Kestrel Motors confirmed that the high-voltage battery fitted to the Kestrel EV is covered by an eight-year manufacturer warranty, subject to the stated mileage limit.",
+        "url": "https://kestrel.example/ownership/battery-warranty"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "SUP003",
+    "category": "direct_support",
+    "claim": "HarborCity Transit added twelve electric buses to its fleet in 2024.",
+    "articles": [
+      {
+        "title": "HarborCity Transit expands its electric bus fleet",
+        "source": "HarborCity Transit",
+        "published_at": "2024-11-20",
+        "content": "HarborCity Transit added twelve battery-powered electric buses to its public transport fleet during 2024. The vehicles will operate on routes serving the eastern districts.",
+        "url": "https://harborcity.example/updates/electric-buses"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "SUP004",
+    "category": "direct_support",
+    "claim": "BluePeak launched its cloud backup service on 15 January 2026.",
+    "articles": [
+      {
+        "title": "BluePeak launches a new cloud backup platform",
+        "source": "BluePeak Technologies",
+        "published_at": "2026-01-15",
+        "content": "BluePeak Technologies launched its cloud backup service on 15 January 2026. The service provides automated backups for business customers.",
+        "url": "https://bluepeak.example/products/cloud-backup"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "SUP005",
+    "category": "direct_support",
+    "claim": "Silverline Foods opened three cold-storage facilities in Tamil Nadu in 2025.",
+    "articles": [
+      {
+        "title": "Silverline Foods expands its cold-chain network",
+        "source": "Silverline Foods",
+        "published_at": "2025-09-12",
+        "content": "Silverline Foods confirmed that it opened three new cold-storage facilities in Tamil Nadu during 2025. The facilities support the company's regional distribution operations.",
+        "url": "https://silverline.example/company/expansion-2025"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "SUP006",
+    "category": "direct_support",
+    "claim": "The NovaTech X5 smartphone has a 120Hz display.",
+    "articles": [
+      {
+        "title": "NovaTech X5 specifications confirmed",
+        "source": "NovaTech",
+        "published_at": "2025-05-06",
+        "content": "The NovaTech X5 features a 6.5-inch display with a refresh rate of 120Hz. The company confirmed the display specification in its official product announcement.",
+        "url": "https://novatech.example/products/x5"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "CON001",
+    "category": "direct_contradiction",
+    "claim": "Orion Motors opened its first electric vehicle assembly plant in Jaipur in 2025.",
+    "articles": [
+      {
+        "title": "Orion Motors confirms no new assembly plant opened in 2025",
+        "source": "Orion Motors",
+        "published_at": "2025-12-20",
+        "content": "Orion Motors confirmed that it did not open an electric vehicle assembly plant in Jaipur during 2025. Vehicle production continued at its existing facility in Chennai.",
+        "url": "https://orion.example/press/production-update"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "CON002",
+    "category": "direct_contradiction",
+    "claim": "LumaPay offers international money transfers without any transaction fees.",
+    "articles": [
+      {
+        "title": "LumaPay publishes its international transfer fee schedule",
+        "source": "LumaPay",
+        "published_at": "2025-07-10",
+        "content": "LumaPay's international transfer service charges customers a transaction fee of 2 percent of the transferred amount. The fee applies to all standard international transfers.",
+        "url": "https://lumapay.example/help/transfer-fees"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "CON003",
+    "category": "direct_contradiction",
+    "claim": "The Aster Phone 12 supports 5G connectivity.",
+    "articles": [
+      {
+        "title": "Aster Phone 12 connectivity specifications",
+        "source": "Aster Devices",
+        "published_at": "2025-04-02",
+        "content": "The Aster Phone 12 does not support 5G connectivity. Its modem supports 4G LTE networks only.",
+        "url": "https://aster.example/devices/phone12/specifications"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "CON004",
+    "category": "direct_contradiction",
+    "claim": "RiverRail launched its Pune to Nashik passenger service on 1 June 2025.",
+    "articles": [
+      {
+        "title": "RiverRail postpones its Pune-Nashik passenger service",
+        "source": "RiverRail",
+        "published_at": "2025-06-02",
+        "content": "RiverRail confirmed that its planned Pune-Nashik passenger service did not begin on 1 June 2025. The launch was postponed because infrastructure testing remained incomplete.",
+        "url": "https://riverrail.example/notices/service-postponement"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "CON005",
+    "category": "direct_contradiction",
+    "claim": "GreenBasket currently operates fifty retail stores in Kerala.",
+    "articles": [
+      {
+        "title": "GreenBasket publishes its current store count",
+        "source": "GreenBasket",
+        "published_at": "2025-10-18",
+        "content": "GreenBasket currently operates thirty-two retail stores across Kerala. The company has not yet reached its previously announced target of fifty stores.",
+        "url": "https://greenbasket.example/company/store-network"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "CON006",
+    "category": "direct_contradiction",
+    "claim": "CloudDesk discontinued all paid subscription plans in 2025.",
+    "articles": [
+      {
+        "title": "CloudDesk confirms its paid subscription plans remain active",
+        "source": "CloudDesk",
+        "published_at": "2025-11-05",
+        "content": "CloudDesk confirmed that it did not discontinue its paid subscription plans in 2025. Customers continue to renew their subscriptions under the existing pricing structure.",
+        "url": "https://clouddesk.example/updates/subscriptions"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "IRR001",
+    "category": "irrelevant_product_feature",
+    "claim": "Northstar Pay offers international money transfers without transaction fees.",
+    "articles": [
+      {
+        "title": "Northstar Pay introduces a redesigned mobile application",
+        "source": "Northstar Newsroom",
+        "published_at": "2025-08-10",
+        "content": "Northstar Pay released a redesigned mobile application featuring a new interface, updated navigation, and an improved transaction history screen.",
+        "url": "https://northstar.example/news/app-redesign"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  },
+  {
+    "id": "IRR002",
+    "category": "irrelevant_missing_specification",
+    "claim": "The Kestrel EV battery warranty lasts eight years.",
+    "articles": [
+      {
+        "title": "Kestrel EV driving range announced",
+        "source": "Kestrel Motors",
+        "published_at": "2025-03-12",
+        "content": "Kestrel Motors announced that its electric vehicle offers a certified driving range of 450 kilometres on a full charge. The figure was measured under the company's stated test conditions.",
+        "url": "https://kestrel.example/news/driving-range"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  },
+  {
+    "id": "IRR003",
+    "category": "irrelevant_time_mismatch",
+    "claim": "HarborCity Transit added twelve electric buses to its fleet in 2025.",
+    "articles": [
+      {
+        "title": "HarborCity Transit expands its fleet during 2024",
+        "source": "HarborCity Transit",
+        "published_at": "2024-11-20",
+        "content": "HarborCity Transit added twelve electric buses to its fleet during 2024. The buses were introduced to improve public transport capacity in the eastern districts.",
+        "url": "https://harborcity.example/updates/fleet-2024"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  },
+  {
+    "id": "IRR004",
+    "category": "irrelevant_geographic_mismatch",
+    "claim": "BluePeak launched its cloud backup service in India in January 2026.",
+    "articles": [
+      {
+        "title": "BluePeak opens a new data centre in Singapore",
+        "source": "BluePeak Technologies",
+        "published_at": "2026-01-15",
+        "content": "BluePeak Technologies opened a new data centre in Singapore to expand its regional infrastructure. The announcement describes the facility and its expected capacity.",
+        "url": "https://bluepeak.example/news/singapore-data-centre"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  },
+  {
+    "id": "IRR005",
+    "category": "irrelevant_superlative",
+    "claim": "Silverline Foods operates the largest cold-storage network in Tamil Nadu.",
+    "articles": [
+      {
+        "title": "Silverline Foods expands its cold-storage network",
+        "source": "Silverline Foods",
+        "published_at": "2025-09-12",
+        "content": "Silverline Foods opened three cold-storage facilities in Tamil Nadu during 2025. The new facilities increase the company's regional storage capacity.",
+        "url": "https://silverline.example/company/expansion-2025"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  },
+  {
+    "id": "IRR006",
+    "category": "irrelevant_opinion",
+    "claim": "The NovaTech X5 has the best camera in its price category.",
+    "articles": [
+      {
+        "title": "Customers share their first impressions of the NovaTech X5",
+        "source": "Mobile User Reviews",
+        "published_at": "2025-05-10",
+        "content": "Several customers praised the NovaTech X5 for its smooth interface, comfortable design, and battery life. The reviews did not include controlled camera comparisons against competing smartphones.",
+        "url": "https://reviews.example/novatech-x5/first-impressions"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  }
+
+  ,
+  {
+    "id": "SUP007",
+    "category": "temporal_support",
+    "claim": "MetroLink began operating its Blue Line extension on 1 April 2025.",
+    "articles": [
+      {
+        "title": "MetroLink begins Blue Line extension operations",
+        "source": "MetroLink",
+        "published_at": "2025-04-01",
+        "content": "MetroLink confirmed that passenger operations on its Blue Line extension began on 1 April 2025. The extension adds four stations to the existing network.",
+        "url": "https://metrolink.example/news/blue-line-extension"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "SUP008",
+    "category": "temporal_support",
+    "claim": "Astra Foods opened its Pune distribution centre in November 2025.",
+    "articles": [
+      {
+        "title": "Astra Foods opens new distribution centre in Pune",
+        "source": "Astra Foods",
+        "published_at": "2025-11-18",
+        "content": "Astra Foods announced that its new distribution centre in Pune officially opened on 18 November 2025. The facility will serve customers across western India.",
+        "url": "https://astrafoods.example/news/pune-centre"
+      }
+    ],
+    "expected_relation": "supports"
+  },
+  {
+    "id": "CON007",
+    "category": "explicit_temporal_contradiction",
+    "claim": "CedarTel launched its 5G home internet service on 10 May 2025.",
+    "articles": [
+      {
+        "title": "CedarTel postpones its 5G home internet launch",
+        "source": "CedarTel",
+        "published_at": "2025-05-10",
+        "content": "CedarTel confirmed that its 5G home internet service did not launch on 10 May 2025. The company postponed the launch until 1 June 2025 because network testing was incomplete.",
+        "url": "https://cedartel.example/updates/launch-postponement"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "CON008",
+    "category": "explicit_temporal_contradiction",
+    "claim": "Lumen Bikes did not release an electric scooter in 2025.",
+    "articles": [
+      {
+        "title": "Lumen Bikes releases its first electric scooter",
+        "source": "Lumen Bikes",
+        "published_at": "2025-12-15",
+        "content": "Lumen Bikes released its first electric scooter in December 2025. The company confirmed that customer deliveries began during the same month.",
+        "url": "https://lumenbikes.example/news/electric-scooter"
+      }
+    ],
+    "expected_relation": "contradicts"
+  },
+  {
+    "id": "IRR007",
+    "category": "temporal_mismatch",
+    "claim": "MetroLink added five Blue Line stations in 2025.",
+    "articles": [
+      {
+        "title": "MetroLink opens three new Blue Line stations",
+        "source": "MetroLink",
+        "published_at": "2024-08-12",
+        "content": "MetroLink opened three new Blue Line stations in August 2024. The stations expanded service to the northern districts. The announcement does not discuss station additions during 2025.",
+        "url": "https://metrolink.example/news/stations-2024"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  },
+  {
+    "id": "IRR008",
+    "category": "temporal_and_geographic_mismatch",
+    "claim": "Astra Foods opened a distribution centre in Chennai in 2025.",
+    "articles": [
+      {
+        "title": "Astra Foods opens distribution centre in Pune",
+        "source": "Astra Foods",
+        "published_at": "2024-11-20",
+        "content": "Astra Foods opened a distribution centre in Pune in November 2024. The facility serves customers across western India. The announcement does not mention a Chennai facility or any opening during 2025.",
+        "url": "https://astrafoods.example/news/pune-centre-2024"
+      }
+    ],
+    "expected_relation": "irrelevant"
+  }
+]
