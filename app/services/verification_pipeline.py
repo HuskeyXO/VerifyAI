@@ -29,6 +29,8 @@ from app.services.verification_errors import (
 
 from sqlalchemy.exc import IntegrityError
 
+import logging
+
 
 from app.services.article_extractor import (
     extract_article_text,
@@ -36,6 +38,8 @@ from app.services.article_extractor import (
 )
 
 MAX_ARTICLE_EXTRACTIONS = 3
+
+logger = logging.getLogger(__name__)
 
 def parse_published_at(value):
     if not value:
@@ -90,8 +94,16 @@ def run_verification(
         search_queries = build_news_queries(verification.claim)
         raw_articles = []
 
-        for search_query in search_queries:
-            print("News search query:", search_query)
+        for query_index, search_query in enumerate(
+            search_queries, start=1
+        ):
+            logger.info(
+                "News search started",
+                extra={
+                    "verification_id": verification_id,
+                    "query_index": query_index,
+                },
+            )
 
             try:
                 raw_articles = provider.search_articles(
@@ -113,7 +125,14 @@ def run_verification(
                     "Could not connect to the news provider."
                 ) from exc
 
-            print("News articles returned:", len(raw_articles))
+            logger.info(
+                "News search completed",
+                extra={
+                    "verification_id": verification_id,
+                    "query_index": query_index,
+                    "article_count": len(raw_articles),
+                },
+            )
 
             if raw_articles:
                 break
@@ -266,7 +285,13 @@ def run_verification(
         
         ai_items = ai_result.get("evidence", [])
 
-        print("AI evidence candidates:", len(ai_items))
+        logger.info(
+            "AI evidence candidates received",
+            extra={
+                "verification_id": verification_id,
+                "candidate_count": len(ai_items),
+            },
+        )
 
         for item in ai_items:
             article_index = item.get("article_index")
@@ -291,11 +316,12 @@ def run_verification(
                     normalize_text(quoted_text) in source_text
                 )
 
-            print(
-                "Evidence candidate check:",
-                {
-                    "relation": item.get("relation"),
-                    "score": item.get("relevance_score"),
+            logger.info(
+                "Evidence candidate validated",
+                extra={
+                    "verification_id": verification_id,
+                    "evidence_relation": item.get("relation"),
+                    "relevance_score": item.get("relevance_score"),
                     "valid_article_index": valid_index,
                     "has_quote": bool(
                         isinstance(quoted_text, str) and quoted_text.strip()
@@ -316,7 +342,13 @@ def run_verification(
             db=db,
         )
 
-        print("Evidence records saved:", len(saved_evidence))
+        logger.info(
+            "Evidence persistence completed",
+            extra={
+                "verification_id": verification_id,
+                "saved_evidence_count": len(saved_evidence),
+            },
+        )
 
         # 6. Calculate and save the report.
         result = generate_verification_result(
@@ -332,7 +364,6 @@ def run_verification(
         )
 
         db.add(report)
-        verification.status = result["status"]
 
         db.commit()
         db.refresh(report)

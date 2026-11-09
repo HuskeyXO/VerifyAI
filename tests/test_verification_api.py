@@ -16,6 +16,7 @@ from app.models.source import Source
 from app.models.verification import VerificationRequest
 
 import app.services.verification_pipeline as pipeline
+import app.tasks.verification as verification_tasks
 
 
 def mock_analyze_claim(claim: str, articles: list[dict]) -> dict:
@@ -95,6 +96,21 @@ def test_run_verification_creates_report(monkeypatch):
         "extract_article_text",
         lambda url: None,
     )
+    monkeypatch.setattr(
+    verification_tasks,
+    "SessionLocal",
+    TestingSessionLocal,
+    )
+
+    queued_tasks = []
+
+    monkeypatch.setattr(
+        verification_tasks.run_verification_task,
+        "delay",
+        lambda verification_id, request_id=None: queued_tasks.append(
+        verification_id
+        )
+    )
 
     try:
         with TestClient(app) as client:
@@ -104,14 +120,21 @@ def test_run_verification_creates_report(monkeypatch):
                 f"/verifications/{verification_id}/run"
             )
 
-            assert response.status_code == 201
+            assert response.status_code == 202
 
-            report = response.json()
-            assert report["verification_id"] == verification_id
-            assert report["status"] == "uncertain"
-            assert report["confidence"] == 0.5
-            assert "2 evidence records" in report["summary"]
-            assert "2 distinct sources" in report["summary"]
+            job = response.json()
+
+            assert job["id"] == verification_id
+            assert job["status"] == "queued"
+            assert queued_tasks == [verification_id]
+
+            # Execute the worker task directly using the test database.
+            worker_result = verification_tasks.run_verification_task.run(
+                verification_id
+            )
+
+            assert worker_result["status"] == "completed"
+            assert worker_result["report_status"] == "uncertain"
 
             # Confirm the report and evidence persisted in the test DB.
             with TestingSessionLocal() as db:
@@ -155,9 +178,30 @@ def test_run_verification_creates_report(monkeypatch):
                     for article in saved_articles
                 )
 
+                saved_verification = (
+                    db.query(VerificationRequest)
+                    .filter(
+                        VerificationRequest.id == verification_id
+                    )
+                    .first()
+                )
+
+                assert saved_verification is not None
+                assert saved_verification.status == "completed"
+
             saved_report_response = client.get(
             f"/verifications/{verification_id}/report"
         )
+            saved_report_response = client.get(
+                f"/verifications/{verification_id}/report"
+            )
+
+            assert saved_report_response.status_code == 200
+            assert (
+                saved_report_response.json()["verification_id"]
+                == verification_id
+            )
+
 
         assert saved_report_response.status_code == 200
         assert saved_report_response.json()["verification_id"] == verification_id
@@ -185,7 +229,7 @@ def test_run_verification_creates_report(monkeypatch):
         engine.dispose()
 
 
-def test_duplicate_run_returns_409(monkeypatch):
+def test_duplicate_queued_run_is_idempotent(monkeypatch):
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -224,6 +268,16 @@ def test_duplicate_run_returns_409(monkeypatch):
         lambda url: None,
 )
 
+    queued_tasks = []
+
+    monkeypatch.setattr(
+        verification_tasks.run_verification_task,
+        "delay",
+        lambda verification_id, request_id=None: queued_tasks.append(
+            verification_id
+        )
+    )
+
     try:
         with TestClient(app) as client:
             verification_id = create_verification(client)
@@ -232,8 +286,14 @@ def test_duplicate_run_returns_409(monkeypatch):
             first = client.post(url)
             second = client.post(url)
 
-            assert first.status_code == 201
-            assert second.status_code == 409
+        assert first.status_code == 202
+        assert second.status_code == 202
+
+        assert first.json()["status"] == "queued"
+        assert second.json()["status"] == "queued"
+
+        # Only one task should have been submitted.
+        assert queued_tasks == [verification_id]
 
     finally:
         app.dependency_overrides.clear()
