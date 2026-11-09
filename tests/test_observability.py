@@ -8,6 +8,13 @@ from app.main import app
 import app.main as main
 
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from app.core.database import Base, get_db
+
+
 def test_health_endpoint_returns_request_id():
     with TestClient(app) as client:
         response = client.get("/health")
@@ -36,12 +43,42 @@ def test_each_request_receives_a_unique_request_id():
     assert first_id != second_id
 
 
-def test_missing_verification_returns_request_id():
-    with TestClient(app) as client:
-        response = client.get("/verifications/99999999")
 
-    assert response.status_code == 404
-    assert response.headers.get("X-Request-ID") is not None
+def test_missing_verification_returns_request_id():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    Base.metadata.create_all(bind=engine)
+
+    TestingSessionLocal = sessionmaker(
+        bind=engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    def override_get_db():
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    try:
+        with TestClient(app) as client:
+            response = client.get("/verifications/99999999")
+
+        assert response.status_code == 404
+        assert response.headers.get("X-Request-ID") is not None
+
+    finally:
+        app.dependency_overrides.clear()
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()
 
 
 
