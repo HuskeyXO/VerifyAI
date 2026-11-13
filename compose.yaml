@@ -1,0 +1,93 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: verifyai-redis
+
+    command: redis-server --appendonly yes
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    restart: unless-stopped
+
+
+  api:
+    build: .
+    container_name: verifyai-api
+
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+
+    env_file:
+      - .env
+
+    environment:
+      REDIS_URL: redis://redis:6379/0
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+    restart: unless-stopped
+
+
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+
+
+  worker:
+    build: .
+    container_name: verifyai-worker
+
+    command:
+      - celery
+      - -A
+      - app.core.celery_app:celery_app
+      - worker
+      - --loglevel=INFO
+      - --pool=solo
+
+    env_file:
+      - .env
+
+    environment:
+      REDIS_URL: redis://redis:6379/0
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+
+volumes:
+  redis_data:

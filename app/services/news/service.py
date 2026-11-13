@@ -1,11 +1,10 @@
-
 import os
 
 from app.services.news.base import NewsProvider
+from app.services.news.cached import CachedNewsProvider
 from app.services.news.gnews import GNewsProvider
 from app.services.news.mock import MockNewsProvider
 from app.services.news.tavily import TavilyProvider
-
 
 
 def get_news_provider() -> NewsProvider:
@@ -15,15 +14,18 @@ def get_news_provider() -> NewsProvider:
     ).strip().lower()
 
     if provider_name == "gnews":
-        return GNewsProvider()
+        provider = GNewsProvider()
 
-    if provider_name == "tavily":
-        return TavilyProvider()
+    elif provider_name == "tavily":
+        provider = TavilyProvider()
 
-    if provider_name == "mock":
+    elif provider_name == "mock":
+        # Keep mock responses deterministic and uncached.
         return MockNewsProvider()
 
-    raise ValueError(
-        f"Unsupported news provider: {provider_name}"
-    )
+    else:
+        raise ValueError(
+            f"Unsupported news provider: {provider_name}"
+        )
 
+    return CachedNewsProvider(provider)

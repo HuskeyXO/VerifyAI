@@ -10,7 +10,11 @@ class Evidence(Base):
     __tablename__ = "evidence"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    claim_id: Mapped[int] = mapped_column(ForeignKey("claims.id"), nullable=False)
+    claim_id: Mapped[int] = mapped_column(
+        ForeignKey("claims.id"),
+        nullable=False,
+        index=True,
+    )
     article_id: Mapped[int] = mapped_column(ForeignKey("articles.id"), nullable=False)
     excerpt: Mapped[str] = mapped_column(Text, nullable=False)
     supports_claim: Mapped[bool] = mapped_column(Boolean, nullable=False)

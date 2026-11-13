@@ -19,6 +19,11 @@ import app.services.verification_pipeline as pipeline
 import app.tasks.verification as verification_tasks
 
 
+from app.core.config import settings
+
+TEST_API_KEY = "test-api-key"
+
+
 def mock_analyze_claim(claim: str, articles: list[dict]) -> dict:
     """Return deterministic test evidence with valid article quotations."""
     evidence = []
@@ -57,6 +62,8 @@ def create_verification(client: TestClient) -> int:
 
 
 def test_run_verification_creates_report(monkeypatch):
+
+    monkeypatch.setattr(settings, "api_key", TEST_API_KEY)
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -113,7 +120,10 @@ def test_run_verification_creates_report(monkeypatch):
     )
 
     try:
-        with TestClient(app) as client:
+        with TestClient(
+                app,
+                headers={"X-API-Key": TEST_API_KEY},
+                ) as client:
             verification_id = create_verification(client)
 
             response = client.post(
@@ -230,6 +240,8 @@ def test_run_verification_creates_report(monkeypatch):
 
 
 def test_duplicate_queued_run_is_idempotent(monkeypatch):
+
+    monkeypatch.setattr(settings, "api_key", TEST_API_KEY)
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -279,7 +291,10 @@ def test_duplicate_queued_run_is_idempotent(monkeypatch):
     )
 
     try:
-        with TestClient(app) as client:
+        with TestClient(
+                app,
+                headers={"X-API-Key": TEST_API_KEY},
+            ) as client:
             verification_id = create_verification(client)
             url = f"/verifications/{verification_id}/run"
 
@@ -301,7 +316,9 @@ def test_duplicate_queued_run_is_idempotent(monkeypatch):
         engine.dispose()
 
 
-def test_missing_verification_returns_404():
+def test_missing_verification_returns_404(monkeypatch):
+
+    monkeypatch.setattr(settings, "api_key", TEST_API_KEY)
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -325,7 +342,10 @@ def test_missing_verification_returns_404():
     app.dependency_overrides[get_db] = override_get_db
 
     try:
-        with TestClient(app) as client:
+        with TestClient(
+            app,
+            headers={"X-API-Key": TEST_API_KEY},
+        ) as client:
             response = client.post(
                 "/verifications/99999999/run"
             )

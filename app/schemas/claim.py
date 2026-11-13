@@ -1,9 +1,12 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-class ClaimCreate(BaseModel):
 
-    verification_id: int
+class ClaimCreate(BaseModel):
+    verification_id: int = Field(gt=0)
     claim_text: str = Field(min_length=10, max_length=1000)
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
 
 class ClaimResponse(BaseModel):
     id: int
@@ -12,6 +15,4 @@ class ClaimResponse(BaseModel):
     status: str
     confidence: float | None
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    model_config = ConfigDict(from_attributes=True)

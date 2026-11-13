@@ -9,6 +9,8 @@ from app.models.evidence import Evidence
 
 from difflib import SequenceMatcher
 
+from collections import defaultdict
+
 
 MIN_RELEVANCE_SCORE = 0.6
 
@@ -288,14 +290,26 @@ def generate_verification_result(
             "summary": "No claims were found for this verification.",
         }
 
+    # Fetch evidence for all claims in a single query.
+    claim_ids = [claim.id for claim in claims]
+
+    evidence_items = (
+        db.query(Evidence)
+        .filter(Evidence.claim_id.in_(claim_ids))
+        .order_by(Evidence.id)
+        .all()
+    )
+
+    # Group evidence by claim_id in memory.
+    evidence_by_claim = defaultdict(list)
+
+    for evidence in evidence_items:
+        evidence_by_claim[evidence.claim_id].append(evidence)
+
     all_evidence = []
 
     for claim in claims:
-        evidence_list = (
-            db.query(Evidence)
-            .filter(Evidence.claim_id == claim.id)
-            .all()
-        )
+        evidence_list = evidence_by_claim[claim.id]
 
         claim_result = _evaluate_evidence(evidence_list)
 

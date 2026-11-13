@@ -4,6 +4,8 @@ import pytest
 from app.services.news.service import get_news_provider
 from app.services.news.tavily import TavilyProvider
 
+from app.services.news.cached import CachedNewsProvider
+
 
 class FakeResponse:
     def __init__(self, data):
@@ -107,7 +109,9 @@ def test_factory_selects_tavily(monkeypatch):
 
     provider = get_news_provider()
 
-    assert isinstance(provider, TavilyProvider)
+    assert isinstance(provider, CachedNewsProvider)
+    assert isinstance(provider.provider, TavilyProvider)
+
 
 
 def test_tavily_requires_api_key(monkeypatch):

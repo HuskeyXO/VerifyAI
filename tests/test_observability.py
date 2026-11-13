@@ -14,6 +14,10 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
 
+from app.core.config import settings
+
+TEST_API_KEY = "test-api-key"
+
 
 def test_health_endpoint_returns_request_id():
     with TestClient(app) as client:
@@ -44,7 +48,9 @@ def test_each_request_receives_a_unique_request_id():
 
 
 
-def test_missing_verification_returns_request_id():
+def test_missing_verification_returns_request_id(monkeypatch):
+
+    monkeypatch.setattr(settings, "api_key", TEST_API_KEY)
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -69,7 +75,10 @@ def test_missing_verification_returns_request_id():
     app.dependency_overrides[get_db] = override_get_db
 
     try:
-        with TestClient(app) as client:
+        with TestClient(
+            app,
+            headers={"X-API-Key": TEST_API_KEY},
+        ) as client:
             response = client.get("/verifications/99999999")
 
         assert response.status_code == 404

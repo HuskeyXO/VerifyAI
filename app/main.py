@@ -18,27 +18,82 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from redis import Redis
 
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from slowapi.util import get_remote_address
+
+from fastapi import FastAPI, Depends
+from app.core.security import require_api_key
+
+
+from app.core.rate_limit_middleware import RateLimitMiddleware
+
 from app.core.database import engine
 
 logger = logging.getLogger(__name__)
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["60/minute"],
+    headers_enabled=True,
+)
 
 
 
 app = FastAPI(
-    title = settings.app_name,
-    version = "1"
+    title=settings.app_name,
+    version="1",
 )
 
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
+)
+
+# SlowAPI checks requests before they reach the routes.
+app.add_middleware(RateLimitMiddleware)
+
+# Keep request logging outside rate limiting so 429 responses
+# are also captured in your application logs.
 app.add_middleware(RequestLoggingMiddleware)
 
-app.include_router(verification_router)
-app.include_router(source_router)
-app.include_router(article_router)
-app.include_router(claim_router)
-app.include_router(evidence_router)
-app.include_router(report_router)
+protected_dependencies = [
+    Depends(require_api_key)
+]
 
+app.include_router(
+    verification_router,
+    dependencies=protected_dependencies,
+)
+
+app.include_router(
+    source_router,
+    dependencies=protected_dependencies,
+)
+
+app.include_router(
+    article_router,
+    dependencies=protected_dependencies,
+)
+
+app.include_router(
+    claim_router,
+    dependencies=protected_dependencies,
+)
+
+app.include_router(
+    evidence_router,
+    dependencies=protected_dependencies,
+)
+
+app.include_router(
+    report_router,
+    dependencies=protected_dependencies,
+)
 
 
 
